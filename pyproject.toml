@@ -1,0 +1,18 @@
+[project]
+name = "halyk-ai-agent"
+version = "0.1.0"
+description = "Banking-document agent for the Halyk AI Challenge"
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=0.120.2",
+    "google-genai>=2.17.0",
+    "openai>=2.53.0",
+    "pdfplumber>=0.11.10",
+    "pymupdf>=1.28.0",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"

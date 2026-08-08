@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1720 570" width="1720" height="570" role="img" aria-label="Принцип: договор даёт условие, выписка даёт цифры, записки их правят, модель включается только когда правило промолчало, улика ищется перебором" font-family='-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'>
+<rect x="50" y="80" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="150.0" y="107.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">200 документов</text>
+<text x="150.0" y="125.0" text-anchor="middle" font-size="10.5" fill="#71717A">договоры · аудит · досье</text>
+<rect x="50" y="170" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="150.0" y="197.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Сканы</text>
+<text x="150.0" y="215.0" text-anchor="middle" font-size="10.5" fill="#71717A">7 страниц внутри PDF</text>
+<rect x="290" y="170" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="390.0" y="197.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Отсев</text>
+<text x="390.0" y="215.0" text-anchor="middle" font-size="10.5" fill="#71717A">отменённые · черновики · чужие</text>
+<path d="M250 111 H270 V201 H281" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="281,196 290,201 281,206" fill="#3F3F46"/>
+<path d="M250 201 H281" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="281,196 290,201 281,206" fill="#3F3F46"/>
+<rect x="530" y="80" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="630.0" y="107.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Договор</text>
+<text x="630.0" y="125.0" text-anchor="middle" font-size="10.5" fill="#71717A">Статья 6</text>
+<rect x="530" y="260" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="630.0" y="287.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Записки</text>
+<text x="630.0" y="305.0" text-anchor="middle" font-size="10.5" fill="#71717A">правят цифры выписки</text>
+<rect x="530" y="350" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="630.0" y="377.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Досье</text>
+<text x="630.0" y="395.0" text-anchor="middle" font-size="10.5" fill="#71717A">порог связанной стороны</text>
+<path d="M490 201 H510 V111 H521" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="521,106 530,111 521,116" fill="#3F3F46"/>
+<path d="M490 201 H510 V291 H521" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="521,286 530,291 521,296" fill="#3F3F46"/>
+<path d="M490 201 H510 V381 H521" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="521,376 530,381 521,386" fill="#3F3F46"/>
+<rect x="770" y="80" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="870.0" y="107.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Правила</text>
+<text x="870.0" y="125.0" text-anchor="middle" font-size="10.5" fill="#71717A">19 образцов формулировок</text>
+<rect x="770" y="195" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="870.0" y="222.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Модель</text>
+<text x="870.0" y="240.0" text-anchor="middle" font-size="10.5" fill="#71717A">на открытом наборе молчит</text>
+<path d="M730 111 H761" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="761,106 770,111 761,116" fill="#3F3F46"/>
+<path d="M870 142 V186" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="865,186 870,195 875,186" fill="#3F3F46"/>
+<rect x="800.6" y="155.5" width="138.8" height="25" rx="11" fill="#18181B"/>
+<text x="870" y="173" text-anchor="middle" font-size="11.5" font-weight="500" fill="#FFFFFF">правило не подошло</text>
+<rect x="1010" y="80" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="1110.0" y="107.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Условие</text>
+<text x="1110.0" y="125.0" text-anchor="middle" font-size="10.5" fill="#71717A">метрика · порог · сторона</text>
+<path d="M970 111 H1001" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1001,106 1010,111 1001,116" fill="#3F3F46"/>
+<path d="M970 226 H1110 V151" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1105,151 1110,142 1115,151" fill="#3F3F46"/>
+<rect x="50" y="440" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="150.0" y="467.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Выписка</text>
+<text x="150.0" y="485.0" text-anchor="middle" font-size="10.5" fill="#71717A">1471 операция</text>
+<rect x="290" y="440" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="390.0" y="467.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Отбор</text>
+<text x="390.0" y="485.0" text-anchor="middle" font-size="10.5" fill="#71717A">нужных единицы</text>
+<rect x="770" y="440" width="200" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="870.0" y="467.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Величина</text>
+<text x="870.0" y="485.0" text-anchor="middle" font-size="10.5" fill="#71717A">числитель ÷ знаменатель</text>
+<path d="M250 471 H281" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="281,466 290,471 281,476" fill="#3F3F46"/>
+<path d="M490 471 H761" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="761,466 770,471 761,476" fill="#3F3F46"/>
+<path d="M730 291 H870 V431" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="865,431 870,440 875,431" fill="#3F3F46"/>
+<path d="M730 381 H870 V431" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="865,431 870,440 875,431" fill="#3F3F46"/>
+<rect x="1250" y="250" width="190" height="62" rx="14" fill="#FFFFFF" stroke="#D4D4D8" stroke-width="1.2"/>
+<text x="1345.0" y="277.0" text-anchor="middle" font-size="14" font-weight="500" fill="#18181B">Сравнить</text>
+<text x="1345.0" y="295.0" text-anchor="middle" font-size="10.5" fill="#71717A">величина против порога</text>
+<path d="M1210 111 H1230 V281 H1241" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1241,276 1250,281 1241,286" fill="#3F3F46"/>
+<path d="M970 471 H1230 V281" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1241,276 1250,281 1241,286" fill="#3F3F46"/>
+<rect x="1480" y="165" width="180" height="62" rx="14" fill="#18181B" stroke="none" stroke-width="1.2"/>
+<text x="1570.0" y="202.0" text-anchor="middle" font-size="14" font-weight="500" fill="#FFFFFF">Соблюдён</text>
+<rect x="1480" y="325" width="180" height="62" rx="14" fill="#18181B" stroke="none" stroke-width="1.2"/>
+<text x="1570.0" y="362.0" text-anchor="middle" font-size="14" font-weight="500" fill="#FFFFFF">Нарушен</text>
+<path d="M1440 281 H1460 V196 H1471" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1471,191 1480,196 1471,201" fill="#3F3F46"/>
+<path d="M1440 281 H1460 V356 H1471" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1471,351 1480,356 1471,361" fill="#3F3F46"/>
+<rect x="1450" y="455" width="240" height="62" rx="14" fill="#18181B" stroke="none" stroke-width="1.2"/>
+<text x="1570.0" y="482.0" text-anchor="middle" font-size="14" font-weight="500" fill="#FFFFFF">Улика</text>
+<text x="1570.0" y="500.0" text-anchor="middle" font-size="10.5" fill="#A1A1AA">убери строку, вердикт сменится</text>
+<path d="M1570 387 V446" stroke="#3F3F46" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+<polygon points="1565,446 1570,455 1575,446" fill="#3F3F46"/>
+<rect x="1530.3" y="408.5" width="79.4" height="25" rx="11" fill="#18181B"/>
+<text x="1570" y="426" text-anchor="middle" font-size="11.5" font-weight="500" fill="#FFFFFF">перебором</text>
+</svg>

@@ -1,0 +1,31 @@
+# Архив прошлой итерации: построена под неверную гипотезу о задаче.
+# Хранится для истории, в репозиторий решения не входит.
+archive/
+
+# Датасет организаторов и присланные материалы, в репозиторий не идут.
+data/
+context/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Выход прогона
+out/
+
+node_modules/
+.DS_Store
+
+.env
+
+# Рабочие документы: журнал замеров, регламент сдачи, спецификации.
+# Полезны команде, но репозиторий это витрина, а не лабораторный дневник.
+RESULTS.md
+RUNBOOK.md
+solution/SPEC.md
+solution_b/SPEC.md
+docs/superpowers/
+solution_b/
+docs/agent-business.svg
