@@ -123,7 +123,8 @@ def _call_gemini(system: str, user: str, schema: type[T]) -> T | None:
     from google import genai
     from google.genai import types
 
-    response = genai.Client(api_key=_key("gemini")).models.generate_content(
+    client = genai.Client(api_key=_key("gemini"))
+    response = client.models.generate_content(
         model=MODELS["gemini"], contents=user,
         config=types.GenerateContentConfig(
             system_instruction=system,

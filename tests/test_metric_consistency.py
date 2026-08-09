@@ -21,3 +21,9 @@ def test_springing_trigger_money_does_not_excuse_ratio_metric():
     text = ("применяется к Заёмщику только при условии, что поступления "
             "превышают $4,000,000.00, и составляет не более 1.70x")
     assert metric_inconsistent("revenue_absolute", text)
+
+
+def test_ratio_metric_with_money_threshold_is_inconsistent():
+    """Обратная сторона: правило дало отношение, а порог — сумма в долларах."""
+    assert metric_inconsistent(
+        "unrestricted_transfers", "на совокупную сумму, превышающую $250,000.00, в пользу")

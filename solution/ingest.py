@@ -12,7 +12,7 @@ from solution.store import Store, Txn, sha256
 
 __all__ = ["ingest_documents", "ingest_ledger", "IngestReport", "TXN_ID_RE"]
 
-TXN_ID_RE = re.compile(r"^TXN-(?P<scenario>[A-Za-z0-9]+)-\d+$")
+TXN_ID_RE = re.compile(r"^TXN-(?P<scenario>[A-Za-z0-9]+)-\S+$")
 
 
 @dataclass(slots=True)

@@ -17,7 +17,8 @@ SUPERSEDED_RE = re.compile(
 SUPERSEDED_ANYWHERE_RE = re.compile(
     r"ЗАМЕНЕН\w*\s+ОКОНЧАТЕЛЬНЫМ\s+ОТЧЁТОМ|"
     r"ПРОМЕЖУТОЧН\w+\s+ВЕДОМОСТЬ\s+ВОПРОСОВ|"
-    r"РАБОЧИЙ\s+ДОКУМЕНТ\s+[—–-]\s+ЗАМЕНЕН",
+    r"РАБОЧИЙ\s+ДОКУМЕНТ\s+[—–-]\s+ЗАМЕНЕН|SUPERSEDED|NOT\s+OPERATIVE|"
+    r"PRIOR-YEAR\s+AGREEMENT",
     re.IGNORECASE)
 HEADER_CHARS = 600
 ARBITRATION_CHARS = 1500
@@ -34,7 +35,10 @@ class DocKind:
 
 
 _RULES: list[tuple[str, re.Pattern]] = [
-    (DocKind.AGREEMENT, re.compile(r"Статья\s+6\s*[—–-]\s*Финансовые\s+ковенанты")),
+    (DocKind.AGREEMENT, re.compile(
+        r"Статья\s+\d+\s*[—–-]\s*Финансовые\s+ковенанты|"
+        r"Article\s+[IVXL]+\s*[—–-]?\s*Financial\s+Covenants|"
+        r"CREDIT\s+AGREEMENT|ДОГОВОР\s+БАНКОВСКОГО\s+ЗАЙМА", re.I)),
     (DocKind.AUDIT, re.compile(
         r"независим\w+\s+аудитор|аудиторск\w+\s+заключени|реклассифик|переквалифик",
         re.IGNORECASE)),
@@ -94,7 +98,7 @@ def classify(text: str) -> str:
     return DocKind.OTHER
 
 
-_SUFFIX = r"(?:JSC|LLP|LLC|Ltd)"
+_SUFFIX = r"(?:JSC|LLP|LLC|Ltd\.?|B\.V\.|GmbH|AG|SA)"
 _BORROWER_RE = re.compile(rf"Заёмщик[а-я]*\s*[,(]?\s*([A-Z][A-Za-z&.\- ]{{3,60}}?\s{_SUFFIX})")
 _COMPANY_RE = re.compile(rf"^([A-Z][A-Za-z&.\- ]{{3,60}}?\s{_SUFFIX})\b")
 
@@ -104,7 +108,9 @@ def _flat(text: str) -> str:
 
 
 COVENANTS_RE = re.compile(
-    r"Статья\s+6\s*[—–-]\s*Финансовые\s+ковенанты(.*?)(?=Статья\s+7\b)", re.S
+    r"(?:Статья\s+\d+\s*[—–-]\s*Финансовые\s+ковенанты"
+    r"|Article\s+[IVXL]+\s*[—–-]?\s*Financial\s+Covenants)"
+    r"(.*?)(?=Статья\s+\d+\s*[—–-]|Article\s+[IVXL]+\s*[—–-])", re.S | re.I
 )
 _ANY_COMPANY_RE = re.compile(rf"\b([A-Z][A-Za-z&.\- ]{{3,60}}?\s{_SUFFIX})\b")
 
@@ -139,12 +145,13 @@ def owner_by_name(text: str, names: dict[str, str]) -> str | None:
 
 
 def link_documents(store: Store) -> LinkReport:
+    known_accounts = set(account_map(store))
     amap = account_map(store)
     known_scenarios = set(amap.values())
     rep = LinkReport()
 
     for doc in store.docs():
-        accounts = sorted(set(ACCOUNT_RE.findall(doc.text)))
+        accounts = sorted(a for a in known_accounts if a in doc.text)
         owners = sorted({amap[a] for a in accounts if a in amap})
 
         kind = classify(doc.text)

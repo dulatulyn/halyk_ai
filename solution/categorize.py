@@ -29,7 +29,12 @@ _REFUND = re.compile(
 )
 
 _PATTERNS: list[tuple[str, re.Pattern]] = [
-    (REVENUE, re.compile(r"sales settlement", re.I)),
+    # «sales settlement» — формулировка открытого набора. В приватном выручка
+    # записана как «Mobile service revenue settlement», и без слова revenue эти
+    # строки утекали в финансирование: выручка 0, EBITDA отрицательная.
+    (REVENUE, re.compile(
+        r"sales settlement|\brevenue\b|sales proceeds|turnover|"
+        r"customer (?:receipt|collection|payment)|subscription (?:revenue|income)", re.I)),
     (INTEREST, re.compile(r"\binterest\b|coupon|subordinated notes", re.I)),
     (CAPEX, re.compile(
         r"purchase of .*(equipment|plant|machin|vehicle|rig|line|system)|"

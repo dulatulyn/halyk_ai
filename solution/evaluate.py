@@ -24,10 +24,37 @@ EQUIPMENT = re.compile(
     r"construction of|acquisition of .*asset", re.I)
 QUARTERS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
 QUARTER_WORD = re.compile(r"\b(first|second|third|fourth)\s+quarter\b", re.I)
+QUARTER_SHORT = re.compile(r"\bQ([1-4])\b", re.I)
 TRANSFER = re.compile(
     r"transfer[^.]{0,80}?\bto\s+[\w\s]{0,30}?subsidiar|asset transfer|"
-    r"contribution of assets|unrestricted subsidiar", re.I)
+    r"contribution of assets|unrestricted subsidiar|intra-?group transfer|"
+    # «Transfer of production line machinery and tooling» — передача активов без
+    # слова subsidiary. Требуем предмет передачи, иначе «Payroll top-up transfer»
+    # тоже сойдёт за отчуждение активов.
+    r"transfer of [^.]{0,40}?(?:equipment|machiner|asset|tooling|plant|line|vehicle|"
+    r"facility|inventory)", re.I)
 GROUP = re.compile(r"\bgroup\b|consolidated", re.I)
+
+_CAPEX_ACT = (r"purchase|acquisition|procurement|installation|upgrade|overhaul|"
+              r"retrofit|refurbish|modernis|moderniz|commissioning|replacement|"
+              r"expansion|construction|fit-?out")
+_CAPEX_OBJ = (r"equipment|machiner|machine|plant|vehicle|rig|kiln|conveyor|turbine|"
+              r"boiler|furnace|press|crane|pipeline|substation|warehouse|facility|"
+              r"infrastructure|asset|line\b|system")
+CAPEX_BROAD = re.compile(
+    rf"capital expenditure|\bcapex\b|"
+    rf"(?:{_CAPEX_ACT})\w*[^.]{{0,40}}?(?:{_CAPEX_OBJ})|"
+    rf"(?:{_CAPEX_OBJ})\w*[^.]{{0,40}}?(?:{_CAPEX_ACT})", re.I)
+
+# Третий уровень: голое капитальное имущество без глагола —
+# «Grain silo aeration equipment». Обслуживание и аренда такого же имущества
+# капзатратами не являются, поэтому отсекаются явно.
+CAPEX_GOODS = re.compile(
+    r"\b(?:equipment|machiner\w*|turbine|kiln|conveyor|boiler|furnace|crane|"
+    r"substation|pipeline|rolling stock|fixed assets?)\b", re.I)
+CAPEX_NOT = re.compile(
+    r"maintenance|repair|servicing|service contract|\blease\b|rental|\brent\b|"
+    r"insurance|advisory|consult|training|licence|license|subscription", re.I)
 
 
 @dataclass(slots=True)
@@ -91,7 +118,15 @@ class Book:
                 and (OPERATING.search(t.description)
                      or (t.txn_id in self.restated and (t.category or "") == "other")
                      or t.txn_id in self.converted)]
-        base = sum((t.abs_amount for t in rows), Decimal(0)) or self.line("other")
+        base = sum((t.abs_amount for t in rows), Decimal(0))
+        if not base:
+            # Запасной путь — вся статья «прочее». Из неё надо вычесть капитальные
+            # покупки: иначе одна и та же строка идёт и в капзатраты, и в опекс,
+            # и EBITDA уходит в минус (у KC — на 387 млн).
+            picked = [t for t in self._pick("other")
+                      if not CAPEX_BROAD.search(t.description)]
+            base = sum((t.abs_amount for t in picked), Decimal(0))
+            base += sum((v for name, v in self.disclosed if name == "other"), Decimal(0))
         return base + self.adj.one_off_total
 
     @property
@@ -101,18 +136,45 @@ class Book:
             rows = self.cat.get("revenue", [])
         return sum((t.abs_amount for t in rows), Decimal(0))
 
+    def quarter_of(self, text: str) -> int | None:
+        if word := QUARTER_WORD.search(text):
+            return QUARTERS[word.group(1).lower()]
+        if short := QUARTER_SHORT.search(text):
+            return int(short.group(1))
+        return None
+
     def revenue_quarter(self, n: int) -> Decimal:
-        total = Decimal(0)
-        for t in self.cat.get("revenue", []):
-            word = QUARTER_WORD.search(t.description)
-            if word and QUARTERS[word.group(1).lower()] == n:
-                total += t.abs_amount
-        return total
+        rows = self.cat.get("revenue", [])
+        total = sum((t.abs_amount for t in rows if self.quarter_of(t.description) == n),
+                    Decimal(0))
+        if total or not rows:
+            return total
+        # Кварталы не размечены словами — берём наибольшую квартальную долю.
+        by_q: dict[int, Decimal] = {}
+        for t in rows:
+            q = self.quarter_of(t.description)
+            if q:
+                by_q[q] = by_q.get(q, Decimal(0)) + t.abs_amount
+        return max(by_q.values()) if by_q else total
 
     @property
     def capex(self) -> Decimal:
         rows = [t for t in self.txns if t.amount < 0
                 and (EQUIPMENT.search(t.description) or TRANSFER.search(t.description))]
+        if not rows:
+            # Узкий детектор промолчал — на приватном наборе это давало ноль там,
+            # где капзатраты записаны как «Kiln conveyor machinery upgrade».
+            # Широкий требует пары «действие + объект»: одного слова мало, иначе
+            # «Equipment yard lease» и «Plant and boiler insurance» пройдут за капзатраты.
+            rows = [t for t in self.txns if t.amount < 0
+                    and (t.category or "") not in ("interest", "insurance", "rent",
+                                                   "taxes", "payroll", "utilities",
+                                                   "revenue", "financing_in")
+                    and CAPEX_BROAD.search(t.description)]
+        if not rows:
+            rows = [t for t in self.cat.get("other", [])
+                    if t.amount < 0 and CAPEX_GOODS.search(t.description)
+                    and not CAPEX_NOT.search(t.description)]
         return sum((t.abs_amount for t in rows), Decimal(0))
 
     def group_capex(self) -> Decimal:
@@ -189,6 +251,9 @@ def compute(cov: Covenant, book: Book) -> tuple[Decimal | None, str | None]:
     if cov.spec is not None:
         return from_spec(cov.spec, book), None
     m = cov.metric
+    if m.startswith("cat_"):
+        name = m[4:]
+        return (book.capex if name == "capex" else book.line(name)), None
     if m == "revenue_absolute":
         return book.revenue, None
     if m == "revenue_q4":

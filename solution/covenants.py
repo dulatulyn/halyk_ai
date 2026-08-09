@@ -6,12 +6,12 @@ from decimal import Decimal
 
 from solution import llm
 from solution.diag import DIAG
-from solution.link import covenants_text, live_agreement
+from solution.link import _flat, covenants_text, live_agreement
 from solution.store import Store
 
 MONEY = re.compile(r"\$\s?([\d][\d,\s]*\.\d{2})")
 RATIO = re.compile(r"(\d+(?:\.\d+)?)\s?x\b")
-CLAUSE_HEAD = r"(?:Пункт|Статья|Раздел|п\.|ст\.)\s*"
+CLAUSE_HEAD = r"(?:Пункт|Статья|Раздел|Section|Clause|п\.|ст\.)\s*"
 
 
 def clause_pattern(clauses: list[str] | None, capture: bool = True) -> re.Pattern:
@@ -20,7 +20,7 @@ def clause_pattern(clauses: list[str] | None, capture: bool = True) -> re.Patter
     group = f"({body})" if capture else f"(?:{body})"
     return re.compile(rf"{CLAUSE_HEAD}{group}")
 DATE = r"(?:\d{4}-\d\d-\d\d|\d\d\.\d\d\.\d{4}|\d\d/\d\d/\d{4})"
-PERIOD = re.compile(rf"с\s+({DATE})\s+по\s+({DATE})")
+PERIOD = re.compile(rf"(?:с|from)\s+({DATE})\s+(?:по|to|through)\s+({DATE})", re.I)
 
 
 def period_year(text: str) -> str:
@@ -67,7 +67,40 @@ class Covenant:
         return body[:90]
 
 
+CATEGORY_NAMES: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"капитальн\w+\s+затрат", re.I), "capex"),
+    (re.compile(r"маркетингов\w+\s+расход|реклам", re.I), "marketing"),
+    (re.compile(r"оплат\w+\s+труда|расход\w+\s+на\s+персонал|заработн|"
+                r"выплат\w+\s+персоналу", re.I), "payroll"),
+    (re.compile(r"коммунальн", re.I), "utilities"),
+    (re.compile(r"арендн\w+\s+платеж|аренд", re.I), "rent"),
+    (re.compile(r"страхов\w+\s+преми", re.I), "insurance"),
+    (re.compile(r"процентн\w+\s+расход", re.I), "interest"),
+    (re.compile(r"телеком|связ\w+\s+и\s+телеком", re.I), "telecom"),
+    (re.compile(r"налог", re.I), "taxes"),
+]
+QUOTED = re.compile(r"[«\"„]([^»\"“]{3,70})[»\"“]")
+
+
+def named_category(text: str) -> str | None:
+    """Статья расходов, названная в кавычках внутри пункта.
+
+    «Максимальные расходы по категории» — один заголовок на много разных
+    ковенантов: у одного заёмщика в кавычках «Капитальные затраты», у другого
+    «Маркетинговые расходы». Без чтения кавычек все они считались капзатратами.
+    """
+    for m in QUOTED.finditer(text):
+        for rx, cat in CATEGORY_NAMES:
+            if rx.search(m.group(1)):
+                return cat
+    return None
+
+
 RULES: list[tuple[str, re.Pattern]] = [
+    ("category_absolute", re.compile(
+        r"расход\w+\s+по\s+(?:стать|категор)|по\s+статье\s+[«\"]", re.I)),
+    ("rent_cap", re.compile(
+        r"Rental\s+Cap|ограничени\w+\s+совокупн\w+\s+арендн\w+\s+платеж", re.I)),
     ("interest_cover", re.compile(r"покрыти\w+\s+процентов", re.I)),
     ("overhead_line_max", re.compile(r"Individual Overhead Line|отдельн\w+\s+стат\w+\s+накладн", re.I)),
     ("related_over_opex", re.compile(r"доля\s+платежей\s+связанным\s+сторонам\s+в\s+операционн", re.I)),
@@ -104,10 +137,15 @@ def _without_trigger(text: str) -> str:
 
 
 def metric_inconsistent(metric: str, text: str) -> bool:
-    if metric == "unknown" or metric in RATIO_METRICS:
+    if metric == "unknown":
         return False
     body = _without_trigger(text)
-    return bool(RATIO.search(body)) and not MONEY.search(body)
+    has_ratio, has_money = bool(RATIO.search(body)), bool(MONEY.search(body))
+    if metric in RATIO_METRICS:
+        # Обратная сторона той же ошибки: правило дало отношение, а порог —
+        # сумма в долларах. У G2 это делило передачи активов на капзатраты.
+        return has_money and not has_ratio
+    return has_ratio and not has_money
 
 
 def ratio_expected(text: str) -> bool:
@@ -156,11 +194,27 @@ def pick_threshold(text: str, metric: str) -> tuple[Decimal | None, Decimal | No
     return None, trigger
 
 
+def pick_body(doc, clauses: list[str] | None, rx: re.Pattern) -> str:
+    """Откуда читать пункты: из раздела ковенантов или из всего договора.
+
+    `covenants_text` ищет русский заголовок «Статья 6 — Финансовые ковенанты».
+    В приватном наборе часть договоров целиком на английском: там ковенанты —
+    `Section 5.1`, и извлекался кусок оглавления. Берём тот источник, в котором
+    реально нашлись ожидаемые из шаблона пункты.
+    """
+    section = covenants_text(doc)
+    whole = _flat(doc.text)
+    if not clauses:
+        return section or whole
+    hits = len({m.group(1) for m in rx.finditer(section)}) if section else 0
+    return section if hits >= len(clauses) else whole
+
+
 def parse_scenario(store: Store, scenario_id: str,
                    clauses: list[str] | None = None) -> list[Covenant]:
     doc = live_agreement(store, scenario_id)
-    body = covenants_text(doc)
     rx = clause_pattern(clauses)
+    body = pick_body(doc, clauses, rx)
     out: list[Covenant] = []
 
     chunks = re.split(rf"(?={clause_pattern(clauses, capture=False).pattern})", body)
@@ -171,6 +225,11 @@ def parse_scenario(store: Store, scenario_id: str,
             continue
         clause = m.group(1)
         metric = pick_metric(text)
+        if metric == "category_absolute":
+            named = named_category(text)
+            metric = f"cat_{named}" if named else "unknown"
+        elif metric == "rent_cap":
+            metric = "cat_rent"
         threshold, trigger = pick_threshold(text, metric)
         if metric_inconsistent(metric, text):
             DIAG.note("metric.inconsistent", f"{scenario_id}/{clause}: {metric}")

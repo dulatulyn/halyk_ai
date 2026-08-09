@@ -52,7 +52,40 @@ def related_parties(store: Store, scenario_id: str) -> tuple[set[str], Decimal, 
         if best is None or len(rows) > len(best[2]):
             best = candidate
 
+    if best and best[0]:
+        return best
+
+    # Досье оформлено не таблицей долей, а записями. Табличный разбор их не
+    # видел, и у девяти заёмщиков из двадцати семи связанных сторон выходило ноль.
+    narrative: set[str] = set()
+    for doc in store.docs(scenario_id=scenario_id):
+        if not doc.superseded:
+            narrative |= narrative_parties(doc.text)
+    if narrative:
+        return narrative, _DEFAULT_THRESHOLD, {n: "запись досье" for n in narrative}
+
     return best or (set(), _DEFAULT_THRESHOLD, {})
+
+
+_RECORD = re.compile(
+    r"Контрагент\s*[«\"]([^»\"]{3,70})[»\"](.{0,320}?)"
+    r"призна\w+\s+Ограниченными\s+платежами", re.I | re.S)
+
+
+def narrative_parties(text: str) -> set[str]:
+    """Связанные стороны из повествовательных записей досье.
+
+    Формулировка: «Контрагент «X» классифицирован как АФФИЛИРОВАННОЕ ЛИЦО …
+    Платежи данному контрагенту признаются Ограниченными платежами». Операнд —
+    именно последняя фраза: она прямо говорит, что платежи считаются
+    ограниченными для целей ковенантов.
+    """
+    out: set[str] = set()
+    for m in _RECORD.finditer(_flat(text)):
+        if re.search(r"\bне\s*$", m.group(2), re.I):
+            continue
+        out.add(normalize_party(m.group(1)))
+    return out
 
 
 _PLEDGE_START = re.compile(r"Доля\s+активов\s+в\s+залоге")
